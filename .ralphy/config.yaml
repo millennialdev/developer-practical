@@ -1,0 +1,46 @@
+project:
+  name: "ironpeak-construction"
+  language: "TypeScript"
+  framework: "Next.js"
+  description: "IronPeak Construction Group - single-page marketing website for a Bay Area residential & commercial construction company"
+
+commands:
+  test: "npm run test:ci"
+  lint: "npm run lint"
+  build: "npm run build"
+
+rules:
+  - "Use Next.js 15 App Router with TypeScript strict mode"
+  - "Use Tailwind CSS for all styling - no inline styles, no CSS modules"
+  - "Brand colors - Red: #C41E2A, Red-dark: #A01824, Black: #1A1A1A, Charcoal: #2D2D2D, Gray-50: #F8F8F8, Gray-100: #F0F0F0, Gray-300: #D1D1D1, Gray-500: #6B6B6B, Gray-600: #4A4A4A"
+  - "Fonts: Outfit (next/font/google) for headings, Inter (next/font/google) for body text"
+  - "Mobile-first responsive design using Tailwind breakpoints (sm, md, lg, xl)"
+  - "Semantic HTML elements (nav, main, section, footer, article)"
+  - "All images use next/image component with descriptive alt text"
+  - "All static data centralized in src/lib/constants.ts - never hardcode text in components"
+  - "Every page section must use the SectionWrapper component for consistent spacing/IDs"
+  - "No carousels, sliders, or auto-rotating content"
+  - "No dropdown menus - flat navigation only"
+  - "Button border-radius: rounded-md (6px) only - no rounded-full (sharp edges brand)"
+  - "Use lucide-react for all icons"
+  - "No UI component libraries (no shadcn, MUI, Chakra) - build from scratch with Tailwind"
+  - "Components must be highly reusable and composable"
+  - "Named exports only (no default exports except page.tsx)"
+  - "Design inspiration: metropolitan-interiors.vercel.app - clean, simple, generous spacing, subtle hover effects"
+  - "Avoid patterns from lundconst.com - no cluttered layouts, no generic templates, no dated interactions"
+  - "Test command: run 'npm run test:ci' for full suite (build + lint + vitest + playwright). Unit only: 'npm run test:unit'. E2E only: 'npm run test:e2e'."
+  - "Use Vitest for component/unit tests. Files go next to source code: src/**/*.test.{ts,tsx}"
+  - "Use Playwright for E2E tests. Files go in e2e/*.spec.ts"
+  - "The progressive test script (scripts/test-ci.sh) auto-skips vitest if no test files exist in src/ and skips playwright if no test files exist in e2e/. Always runs build + lint."
+
+boundaries:
+  never_touch:
+    - "*.lock"
+    - "node_modules/**"
+    - ".next/**"
+    - ".git/**"
+    - ".ralphy/**"
+    - "PRD.yaml"
+    - "CLAUDE.md"
+    - "assets/**"
+    - "docs/**"

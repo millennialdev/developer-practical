@@ -1,0 +1,1219 @@
+tasks:
+  # ═══════════════════════════════════════════════
+  # PHASE 1: FOUNDATION (Tasks 1-5)
+  # ═══════════════════════════════════════════════
+
+  - title: "Initialize Next.js project with TypeScript, Tailwind CSS, and testing infrastructure"
+    completed: false
+    description: |
+      Set up a new Next.js 15 project in the current directory from scratch.
+
+      IMPORTANT: First, initialize git for this project:
+        git init
+        git branch -M main
+        git remote add origin https://github.com/millennialdev/developer-practical.git
+
+      Then scaffold the Next.js project:
+        npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --no-turbopack --import-alias "@/*"
+      Accept all defaults when prompted. If it asks about overwriting existing files, say yes.
+
+      After creation, install the only additional dependency:
+        npm install lucide-react
+
+      Install test dependencies:
+        npm install -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/jest-dom @playwright/test @axe-core/playwright
+        npx playwright install chromium
+
+      Create testing configuration files:
+
+      1. **vitest.config.ts** — Vitest configuration with React plugin, jsdom environment, @/* path alias, include src/**/*.{test,spec}.{ts,tsx}, globals: true
+
+      2. **src/test-setup.ts** — Import @testing-library/jest-dom/vitest + mock next/image (render as plain <img> element for jsdom compatibility)
+
+      3. **playwright.config.ts** — Set testDir to ./e2e, configure webServer to run 'npm run build && npm run start' on port 3000, define 3 projects: Desktop Chrome, Pixel 5, iPad gen 7
+
+      4. Create directories:
+         mkdir -p e2e scripts
+
+      5. **scripts/test-ci.sh** — Progressive test script:
+         - Always: npm run build && npm run lint
+         - If src/**/*.test.* files exist: npx vitest run --reporter=verbose
+         - If e2e/**/*.spec.* files exist: npx playwright test --reporter=line
+         - Use 'set -e' for fail-fast behavior
+         - Make executable: chmod +x scripts/test-ci.sh
+
+      6. Add to package.json scripts:
+         - "test:ci": "./scripts/test-ci.sh"
+         - "test:unit": "vitest run --reporter=verbose"
+         - "test:e2e": "playwright test --reporter=line"
+
+      Verify the project builds and testing infrastructure is functional:
+        npm run build
+        npm run test:ci
+
+      The test:ci command should pass (build+lint only, since no test files exist yet).
+
+      Confirm these files exist: src/app/layout.tsx, src/app/page.tsx, src/app/globals.css, tailwind.config.ts (or postcss.config), tsconfig.json, next.config.ts, vitest.config.ts, playwright.config.ts, src/test-setup.ts, scripts/test-ci.sh
+
+      Do NOT modify any styling yet. This task is purely scaffolding.
+
+  - title: "Configure fonts, brand theme, and global styles"
+    completed: false
+    description: |
+      Set up the design system foundation with fonts and brand colors.
+
+      1. Edit src/app/layout.tsx:
+         - Import Outfit and Inter from next/font/google
+         - Outfit config: subsets: ['latin'], weight: ['600','700','800'], variable: '--font-outfit', display: 'swap'
+         - Inter config: subsets: ['latin'], weight: ['400','500','600'], variable: '--font-inter', display: 'swap'
+         - Apply both font variables to the <html> element: className={`${outfit.variable} ${inter.variable}`}
+         - Set metadata:
+           title: "IronPeak Construction Group | Bay Area Construction"
+           description: "Full-service residential and commercial construction in San Jose and the Bay Area. Quality builds, reliable timelines, expert craftsmanship since 2014."
+
+      2. Edit src/app/globals.css. After the Tailwind directives (@tailwind base/components/utilities or @import "tailwindcss"), add custom theme configuration.
+
+         If using Tailwind v4 (with @import "tailwindcss"):
+         ```css
+         @theme {
+           --color-brand-red: #C41E2A;
+           --color-brand-red-dark: #A01824;
+           --color-brand-black: #1A1A1A;
+           --color-brand-charcoal: #2D2D2D;
+           --color-brand-gray-50: #F8F8F8;
+           --color-brand-gray-100: #F0F0F0;
+           --color-brand-gray-300: #D1D1D1;
+           --color-brand-gray-500: #6B6B6B;
+           --color-brand-gray-600: #4A4A4A;
+           --font-heading: var(--font-outfit), system-ui, sans-serif;
+           --font-body: var(--font-inter), system-ui, sans-serif;
+         }
+         ```
+
+         If using Tailwind v3 (with tailwind.config.ts), extend the theme there instead:
+         ```ts
+         colors: {
+           brand: {
+             red: { DEFAULT: '#C41E2A', dark: '#A01824' },
+             black: '#1A1A1A',
+             charcoal: '#2D2D2D',
+             'gray-50': '#F8F8F8',
+             // ... etc
+           }
+         },
+         fontFamily: {
+           heading: ['var(--font-outfit)', 'system-ui', 'sans-serif'],
+           body: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+         }
+         ```
+
+         In globals.css, add base styles:
+         ```css
+         html { scroll-behavior: smooth; }
+         body { font-family: var(--font-body); color: #4A4A4A; }
+         h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); color: #1A1A1A; }
+         ```
+
+         Remove ALL default Next.js template styles (the dark mode grid layout, Vercel branding styles, etc.).
+
+      3. Clear src/app/page.tsx — replace with:
+         ```tsx
+         export default function HomePage() {
+           return (
+             <main>
+               <h1 className="text-4xl font-heading font-bold text-center py-20">
+                 IronPeak Construction Group
+               </h1>
+             </main>
+           );
+         }
+         ```
+
+      Run npm run build to verify fonts and theme compile correctly.
+
+      Testing note: Build and lint are the meaningful tests for this task. Do not create test files — dedicated Task 5 (UI primitive test suite) will handle all component and constants testing.
+
+  - title: "Copy logo and create constants and types files"
+    completed: false
+    description: |
+      Set up all static assets and data.
+
+      1. Create image directories and copy the logo:
+         mkdir -p public/images/services
+         cp assets/Logo.png public/images/logo.png
+
+      2. Create src/lib/types.ts with shared interfaces:
+         ```typescript
+         export interface NavLink {
+           label: string;
+           href: string;
+         }
+
+         export interface Service {
+           title: string;
+           description: string;
+           icon: string;
+           image: string;
+         }
+
+         export interface FooterLinkSection {
+           title: string;
+           links: string[] | NavLink[];
+         }
+
+         export interface ProcessStep {
+           number: string;
+           title: string;
+           description: string;
+         }
+
+         export interface FAQItem {
+           question: string;
+           answer: string;
+         }
+
+         export interface Stat {
+           value: string;
+           label: string;
+         }
+         ```
+
+      3. Create src/lib/constants.ts with ALL site data (import types from ./types):
+         ```typescript
+         import type { NavLink, Service, FooterLinkSection, ProcessStep, FAQItem, Stat } from "./types";
+
+         export const COMPANY = {
+           name: "IronPeak Construction Group",
+           tagline: "Built With Strength And Precision",
+           phone: "(408) 555-0198",
+           email: "info@ironpeakcg.com",
+           address: "San Jose, California",
+           founded: "2014",
+           serviceArea: "Bay Area (San Jose, Santa Clara, Sunnyvale, Palo Alto, Fremont)",
+           heroSubtext: "We believe the best results come from a disciplined approach to design and execution. IronPeak delivers dependable construction for homeowners and businesses across the Bay Area.",
+           aboutText: "IronPeak Construction Group is a full-service construction company delivering high-quality residential and small commercial projects throughout the Bay Area. Known for dependable timelines, clear communication, and solid workmanship since 2014.",
+           aboutText2: "Our team brings over a decade of experience to every project, whether it's a custom home build, a full-scale renovation, or a commercial build-out. We focus on clear communication, dependable timelines, and workmanship you can trust.",
+         } as const;
+
+         export const NAV_LINKS: NavLink[] = [
+           { label: "Home", href: "#home" },
+           { label: "About Us", href: "#about" },
+           { label: "Services", href: "#services" },
+           { label: "Contact Us", href: "#contact" },
+         ];
+
+         export const STATS: Stat[] = [
+           { value: "10+", label: "Years Experience" },
+           { value: "500+", label: "Projects Completed" },
+           { value: "100%", label: "Client Satisfaction" },
+         ];
+
+         export const SERVICES: Service[] = [
+           {
+             title: "Residential Construction",
+             description: "From foundation to finish, we build quality homes designed for Bay Area living. Custom floor plans, premium materials, and meticulous craftsmanship on every project.",
+             icon: "Home",
+             image: "/images/services/residential.jpg",
+           },
+           {
+             title: "Home Remodeling & Renovation",
+             description: "Transform your existing space with precision renovations. Kitchens, bathrooms, additions, and whole-home remodels that increase value and comfort.",
+             icon: "Hammer",
+             image: "/images/services/remodeling.jpg",
+           },
+           {
+             title: "Commercial Build Outs",
+             description: "Professional tenant improvements and commercial construction for retail, office, and restaurant spaces. On time, on budget, built to code.",
+             icon: "Building2",
+             image: "/images/services/commercial.jpg",
+           },
+           {
+             title: "Design Build Services",
+             description: "Streamline your project with integrated design and construction. One team, one vision, one point of accountability from concept to completion.",
+             icon: "PenTool",
+             image: "/images/services/design-build.jpg",
+           },
+           {
+             title: "Structural & Concrete Work",
+             description: "Engineered foundations, retaining walls, and structural reinforcement. We build the backbone that everything else depends on.",
+             icon: "Boxes",
+             image: "/images/services/structural.jpg",
+           },
+           {
+             title: "Project Management & Consulting",
+             description: "Expert guidance for complex projects. Scheduling, budgeting, permitting, and oversight to keep your build running smoothly.",
+             icon: "ClipboardList",
+             image: "/images/services/consulting.jpg",
+           },
+         ];
+
+         export const FOOTER_SECTIONS = {
+           about: {
+             title: "About Company",
+             text: "IronPeak Construction Group has been delivering quality construction services across the Bay Area since 2014. We build with strength, precision, and integrity.",
+           },
+           industries: {
+             title: "Industries",
+             links: ["Residential", "Commercial", "Real Estate", "Hospitality", "Retail", "Healthcare"],
+           },
+           usefulLinks: {
+             title: "Useful Links",
+             links: [
+               { label: "About Us", href: "#about" },
+               { label: "Services", href: "#services" },
+               { label: "Contact Us", href: "#contact" },
+               { label: "Privacy Policy", href: "#" },
+             ] as NavLink[],
+           },
+           coreServices: {
+             title: "Core Services",
+             links: ["General Contracting", "Planning & Design", "Renovations & Remodeling", "Structural Engineering", "Project Management"],
+           },
+         } as const;
+
+         // BONUS SECTION DATA (for How It Works, FAQ, CTA)
+         export const PROCESS_STEPS: ProcessStep[] = [
+           { number: "01", title: "Initial Consultation", description: "We discuss your vision, assess the project scope, and provide a clear, detailed estimate with no hidden costs." },
+           { number: "02", title: "Design & Planning", description: "Our team develops comprehensive plans, secures permits, and creates a realistic timeline for your approval." },
+           { number: "03", title: "Construction", description: "Skilled crews execute the build with quality materials, regular progress updates, and strict adherence to schedule." },
+           { number: "04", title: "Final Walkthrough", description: "We conduct a thorough inspection with you, ensure every detail meets our standards, and hand over your completed project." },
+         ];
+
+         export const FAQ_ITEMS: FAQItem[] = [
+           { question: "What areas do you serve?", answer: "We serve the entire Bay Area including San Jose, Santa Clara, Sunnyvale, Palo Alto, Fremont, and surrounding communities." },
+           { question: "How long does a typical project take?", answer: "Timelines vary by scope. A kitchen remodel typically takes 6-10 weeks, while a full home build can take 6-12 months. We provide detailed schedules during the planning phase." },
+           { question: "Do you handle permits and inspections?", answer: "Yes. We manage all permitting, inspections, and code compliance so you don't have to worry about the paperwork." },
+           { question: "What is your payment structure?", answer: "We typically work with a milestone-based payment schedule tied to project phases. A detailed payment plan is included in every contract." },
+           { question: "Can I make changes during construction?", answer: "We accommodate changes when possible and clearly communicate any impact on timeline or budget before proceeding." },
+           { question: "Are you licensed and insured?", answer: "Yes. IronPeak Construction Group is fully licensed, bonded, and insured for all residential and commercial work in California." },
+         ];
+         ```
+
+      4. IMPORTANT — Logo background handling:
+         The logo PNG has a light/white background that will look bad on dark backgrounds (navbar, footer).
+         After copying, check if the logo has transparency. If it has a solid white/light background:
+         - Option A: Use an image processing tool to remove the background (preferred)
+         - Option B: Note this for the Navbar/Footer tasks — the logo should be displayed with appropriate
+           CSS treatment (e.g., a light background padding, or mix-blend-mode) to look clean on dark surfaces.
+         The agent building Navbar (Task 5) and Footer (Task 6) MUST verify the logo renders cleanly
+         on the dark bg-brand-black background and apply CSS fixes if needed (e.g., bg-white rounded p-1,
+         or mix-blend-mode: screen, or adding a light container around it).
+
+      Verify the file compiles: run npm run build.
+
+      Testing note: Build and lint are the meaningful tests for this task. Do not create test files — dedicated Task 5 (UI primitive test suite) will handle all component and constants testing.
+
+  - title: "Create reusable UI components"
+    completed: false
+    description: |
+      Create the atomic UI component library. These components are used by EVERY section.
+
+      1. Create src/components/ui/Container.tsx:
+         A centered max-width wrapper.
+         ```tsx
+         interface ContainerProps {
+           children: React.ReactNode;
+           className?: string;
+         }
+
+         export function Container({ children, className = "" }: ContainerProps) {
+           return (
+             <div className={`mx-auto max-w-7xl px-6 lg:px-8 ${className}`}>
+               {children}
+             </div>
+           );
+         }
+         ```
+
+      2. Create src/components/ui/SectionWrapper.tsx:
+         Every page section wraps in this for consistent spacing and anchor IDs.
+         ```tsx
+         interface SectionWrapperProps {
+           children: React.ReactNode;
+           id?: string;
+           className?: string;
+           background?: "white" | "light" | "dark";
+         }
+
+         export function SectionWrapper({ children, id, className = "", background = "white" }: SectionWrapperProps) {
+           const bgMap = {
+             white: "bg-white",
+             light: "bg-brand-gray-50",
+             dark: "bg-brand-black text-white",
+           };
+           return (
+             <section id={id} className={`py-16 md:py-20 lg:py-24 ${bgMap[background]} ${className}`}>
+               <Container>{children}</Container>
+             </section>
+           );
+         }
+         ```
+         Import Container from ./Container.
+
+      3. Create src/components/ui/SectionHeading.tsx:
+         Reusable heading block with optional tag and subtitle.
+         ```tsx
+         interface SectionHeadingProps {
+           tag?: string;
+           title: string;
+           subtitle?: string;
+           centered?: boolean;
+           light?: boolean;
+           className?: string;
+         }
+
+         export function SectionHeading({ tag, title, subtitle, centered = false, light = false, className = "" }: SectionHeadingProps) {
+           return (
+             <div className={`${centered ? "text-center" : ""} ${className}`}>
+               {tag && (
+                 <span className={`text-brand-red font-semibold text-sm tracking-widest uppercase font-body`}>
+                   {tag}
+                 </span>
+               )}
+               <h2 className={`text-3xl md:text-4xl lg:text-[40px] font-bold font-heading leading-tight ${tag ? "mt-3" : ""} ${light ? "text-white" : "text-brand-black"}`}>
+                 {title}
+               </h2>
+               {subtitle && (
+                 <p className={`mt-4 text-base leading-relaxed max-w-2xl ${centered ? "mx-auto" : ""} ${light ? "text-gray-300" : "text-brand-gray-500"}`}>
+                   {subtitle}
+                 </p>
+               )}
+             </div>
+           );
+         }
+         ```
+
+      4. Create src/components/ui/Button.tsx:
+         ```tsx
+         import { ArrowUpRight } from "lucide-react";
+
+         interface ButtonProps {
+           children: React.ReactNode;
+           variant?: "primary" | "secondary";
+           href?: string;
+           className?: string;
+           showArrow?: boolean;
+           onClick?: () => void;
+         }
+
+         export function Button({ children, variant = "primary", href, className = "", showArrow = false, onClick }: ButtonProps) {
+           const base = "inline-flex items-center gap-2 px-8 py-3.5 font-semibold font-body rounded-md transition-all duration-300 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2";
+           const variants = {
+             primary: "bg-brand-red text-white hover:bg-brand-red-dark hover:-translate-y-0.5",
+             secondary: "border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white hover:-translate-y-0.5",
+           };
+           const classes = `${base} ${variants[variant]} ${className}`;
+
+           if (href) {
+             return (
+               <a href={href} className={classes}>
+                 {children}
+                 {showArrow && <ArrowUpRight size={18} />}
+               </a>
+             );
+           }
+           return (
+             <button onClick={onClick} className={classes}>
+               {children}
+               {showArrow && <ArrowUpRight size={18} />}
+             </button>
+           );
+         }
+         ```
+
+      5. Create src/components/ui/Card.tsx:
+         A generic, reusable card with image and content slot.
+         ```tsx
+         import Image from "next/image";
+
+         interface CardProps {
+           image?: string;
+           imageAlt?: string;
+           children: React.ReactNode;
+           className?: string;
+           hoverEffect?: boolean;
+         }
+
+         export function Card({ image, imageAlt = "", children, className = "", hoverEffect = true }: CardProps) {
+           return (
+             <article className={`group bg-white rounded-lg overflow-hidden border border-brand-gray-100 ${hoverEffect ? "shadow-sm hover:shadow-xl transition-all duration-300" : ""} ${className}`}>
+               {image && (
+                 <div className="relative aspect-[4/3] overflow-hidden">
+                   <Image
+                     src={image}
+                     alt={imageAlt}
+                     fill
+                     className="object-cover group-hover:scale-105 transition-transform duration-500"
+                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                   />
+                 </div>
+               )}
+               <div className="h-1 w-full bg-brand-red" />
+               <div className="p-6">
+                 {children}
+               </div>
+             </article>
+           );
+         }
+         ```
+
+      Run npm run build to verify all components compile.
+
+      Testing note: Do not create test files for these components. The next task (Task 5) is a dedicated testing milestone that will write comprehensive tests for all UI primitives.
+
+  - title: "Write comprehensive UI primitive test suite"
+    completed: false
+    description: |
+      Dedicated testing milestone for all UI components and constants. This task writes ONLY test files — no component code changes.
+
+      Write Vitest tests for the following files. All test files should be placed next to their source files in src/components/ui/ and src/lib/:
+
+      1. **src/components/ui/Button.test.tsx**:
+         - Renders as <a> element when href prop is provided
+         - Renders as <button> element when href prop is not provided
+         - Applies primary variant styles by default
+         - Applies secondary variant styles when variant="secondary"
+         - Shows ArrowUpRight icon when showArrow={true}
+         - Does not show arrow icon when showArrow={false} or omitted
+         - Calls onClick handler when clicked (button variant)
+         - Navigates to href when clicked (link variant)
+         - Applies custom className correctly
+         - Has focus ring styles (focus:ring-2 focus:ring-brand-red)
+
+      2. **src/components/ui/SectionWrapper.test.tsx**:
+         - Renders children content
+         - Applies section id when provided
+         - Renders with white background by default
+         - Renders with light background when background="light"
+         - Renders with dark background when background="dark"
+         - Applies custom className correctly
+         - Contains Container component
+
+      3. **src/components/ui/SectionHeading.test.tsx**:
+         - Renders title in h2 element
+         - Renders optional tag when provided
+         - Renders optional subtitle when provided
+         - Centers text when centered={true}
+         - Applies light mode styles when light={true}
+         - Applies custom className correctly
+
+      4. **src/components/ui/Card.test.tsx**:
+         - Renders children content
+         - Renders image when provided
+         - Does not render image when not provided
+         - Applies hover effect by default (hoverEffect={true})
+         - Does not apply hover effect when hoverEffect={false}
+         - Renders as article element
+         - Red accent strip (h-1 w-full bg-brand-red) is present
+         - Applies custom className correctly
+
+      5. **src/components/ui/Container.test.tsx**:
+         - Renders children content
+         - Has max-w-7xl class
+         - Has horizontal padding classes (px-6 lg:px-8)
+         - Has horizontal margin auto (mx-auto) for centering
+         - Applies custom className correctly
+
+      6. **src/lib/constants.test.ts**:
+         - SERVICES array has exactly 6 items
+         - Each service has required fields: title, description, icon, image
+         - NAV_LINKS has exactly 4 items
+         - Each nav link has label and href starting with '#'
+         - PROCESS_STEPS has exactly 4 items
+         - Each process step has number, title, description
+         - FAQ_ITEMS has exactly 6 items
+         - Each FAQ item has question and answer
+         - STATS has exactly 3 items
+         - Each stat has value and label
+         - COMPANY object has all required fields (name, tagline, phone, email, address, founded, serviceArea, heroSubtext, aboutText, aboutText2)
+         - FOOTER_SECTIONS has all 4 subsections (about, industries, usefulLinks, coreServices)
+
+      All tests should use @testing-library/react for component tests and standard Vitest assertions for constants tests.
+
+      After writing tests, verify they all pass:
+        npx vitest run --reporter=verbose
+
+      Then verify the full CI suite passes:
+        npm run test:ci
+
+      Expected result: All unit tests pass, build succeeds, lint passes. Playwright is skipped (no E2E tests exist yet).
+
+  # ═══════════════════════════════════════════════
+  # PHASE 2: LAYOUT (Tasks 6-7)
+  # ═══════════════════════════════════════════════
+
+  - title: "Build the Navbar with mobile hamburger menu"
+    completed: false
+    description: |
+      Create src/components/layout/Navbar.tsx — a sticky dark navigation bar.
+
+      Add 'use client' at the top (uses useState for mobile menu).
+
+      Import: NAV_LINKS from "@/lib/constants", Image from "next/image", { Menu, X } from "lucide-react", Button from "@/components/ui/Button".
+
+      Desktop layout (lg breakpoint and above):
+      - Fixed position: fixed top-0 left-0 right-0 z-50 bg-brand-black
+      - Inner container: max-w-7xl mx-auto px-6 lg:px-8, flex items-center justify-between, h-20
+      - Left: Logo using next/image — src="/images/logo.png", alt="IronPeak Construction Group", height={40}, width={160} (adjust width to be proportional). Add className="h-10 w-auto" for responsive sizing.
+        IMPORTANT: The logo may have a non-transparent background. Verify it looks correct on bg-brand-black.
+        If it appears with an ugly white rectangle, wrap it in a container with appropriate styling
+        (e.g., bg-white/90 rounded px-2 py-1) or use CSS to handle it. The logo must look clean and professional.
+      - Center: <nav> with flex gap-8. Map NAV_LINKS to <a> elements with:
+        className="text-white text-[15px] font-medium font-body relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-brand-red after:transition-all after:duration-300 hover:after:w-full hover:text-brand-red transition-colors"
+      - Right: Button component — variant="primary", href="#contact", children="Get Free Quote", showArrow={true}
+      - Hide nav links and CTA on mobile (hidden lg:flex)
+
+      Mobile layout (below lg):
+      - Show hamburger: <button> with <Menu size={24} className="text-white" />, shown on lg:hidden
+      - Mobile menu state: const [mobileOpen, setMobileOpen] = useState(false)
+      - When open, render a div below the navbar:
+        - fixed top-20 left-0 right-0 bottom-0 bg-brand-black/95 z-40 backdrop-blur-sm
+        - Flex flex-col items-center justify-center gap-6 p-8
+        - Nav links stacked vertically: text-white text-xl font-medium, each with py-3
+        - "Get Free Quote" Button at bottom
+        - X icon at top-right to close
+        - Add transition: use conditional className with opacity and translate
+
+      - Close mobile menu when a nav link is clicked (onClick handler that sets mobileOpen to false)
+      - Prevent body scroll when mobile menu is open (optional: useEffect to toggle overflow-hidden on body)
+
+      Run npm run build.
+
+      Testing note: When writing tests for this component, focus on smoke tests:
+      - Renders logo image
+      - Renders all 4 nav links with correct hrefs
+      - Renders "Get Free Quote" CTA button
+      - Mobile menu opens and closes correctly
+      - Mobile menu links close the menu when clicked
+
+  - title: "Build the Footer with newsletter and social links"
+    completed: false
+    description: |
+      Create src/components/layout/Footer.tsx.
+
+      Import: COMPANY, FOOTER_SECTIONS from "@/lib/constants", Image from "next/image", Container from "@/components/ui/Container", { Phone, Mail, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react".
+
+      Structure:
+      <footer id="contact" className="bg-brand-black text-white">
+
+      NEWSLETTER STRIP (TOP OF FOOTER — matches wireframe):
+      - Container wrapper with py-8
+      - flex flex-col md:flex-row items-center justify-between gap-6
+      - Left: Logo <Image src="/images/logo.png" alt="IronPeak" width={140} height={36} className="h-9 w-auto" />
+        (same treatment as navbar for dark bg — ensure it looks clean on bg-brand-black)
+      - Right: <div className="flex w-full md:w-auto">
+        - <input type="email" placeholder="Your email address..." className="bg-gray-900 border border-gray-700 rounded-l-md px-4 py-3 text-sm text-white placeholder-gray-500 w-full md:w-64 focus:outline-none focus:border-brand-red transition-colors" />
+        - <button className="bg-brand-red text-white px-6 py-3 font-semibold text-sm rounded-r-md hover:bg-brand-red-dark transition-colors whitespace-nowrap">Let's Talk</button>
+
+      MAIN CONTENT AREA:
+      - border-t border-gray-800
+      - Container wrapper with py-16 md:py-20
+      - Grid: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8
+
+      Column 1 — About Company (with contact info, NO logo here since it's in the newsletter strip):
+      - <h4 className="font-heading text-lg font-semibold mb-6">{FOOTER_SECTIONS.about.title}</h4>
+      - Text: FOOTER_SECTIONS.about.text — text-gray-400 text-sm leading-relaxed
+      - Contact items (mt-6, flex flex-col gap-3):
+        - Phone icon + COMPANY.phone — flex items-center gap-2 text-gray-400 text-sm hover:text-brand-red transition-colors
+        - Mail icon + COMPANY.email — same styling
+        - MapPin icon + COMPANY.address — same styling
+
+      Column 2 — Industries:
+      - <h4 className="font-heading text-lg font-semibold mb-6">{FOOTER_SECTIONS.industries.title}</h4>
+      - <ul className="space-y-2.5">
+      - Map links to <li><span className="text-gray-400 text-sm hover:text-brand-red transition-colors cursor-pointer">{link}</span></li>
+
+      Column 3 — Useful Links:
+      - Same <h4> heading style
+      - Map FOOTER_SECTIONS.usefulLinks.links to <li><a href={link.href} className="text-gray-400 text-sm hover:text-brand-red transition-colors">{link.label}</a></li>
+
+      Column 4 — Core Services:
+      - Same <h4> heading style
+      - Same list styling as industries
+
+      COPYRIGHT BAR:
+      - border-t border-gray-800 py-6
+      - Container with flex flex-col md:flex-row justify-between items-center gap-4
+      - Left: "© 2026 IronPeak Construction Group. All rights reserved." text-gray-500 text-sm
+      - Right: Social icons row — flex gap-4, each icon: <a href="#" className="text-gray-500 hover:text-brand-red transition-colors"><Facebook size={18} /></a> (also Twitter, Instagram, Linkedin)
+
+      Run npm run build.
+
+      Testing note: When writing tests for this component, focus on smoke tests:
+      - Renders contact info (phone, email, address)
+      - Renders newsletter input field
+      - Renders copyright text
+      - Renders all 4 footer section headings (About Company, Industries, Useful Links, Core Services)
+
+  # ═══════════════════════════════════════════════
+  # PHASE 3: CORE SECTIONS (Tasks 8-10)
+  # ═══════════════════════════════════════════════
+
+  - title: "Build the Hero section with background image"
+    completed: false
+    description: |
+      Create src/components/sections/Hero.tsx.
+
+      First, download the hero background image:
+        curl -L "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" -o public/images/hero-bg.jpg
+      If that URL fails, try:
+        curl -L "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&q=80" -o public/images/hero-bg.jpg
+      We need a wide-angle construction site or modern building under construction.
+
+      Import: COMPANY from "@/lib/constants", Image from "next/image", Container from "@/components/ui/Container", Button from "@/components/ui/Button".
+
+      Structure:
+      <section id="home" className="relative min-h-screen flex items-center pt-20">
+
+      Background layer:
+      - <Image src="/images/hero-bg.jpg" alt="Construction site" fill className="object-cover" priority sizes="100vw" />
+      - <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
+
+      Content layer (relative z-10):
+      - <Container className="relative z-10">
+      - <div className="max-w-2xl py-20 lg:py-0">
+        - Tag: <span className="text-brand-red font-semibold text-sm tracking-widest uppercase font-body">Residential & Commercial Construction</span>
+        - Heading: <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-heading font-extrabold text-white leading-[1.1] mt-4">{COMPANY.tagline}</h1>
+        - Subtext: <p className="text-white/80 text-base sm:text-lg mt-6 max-w-xl leading-relaxed font-body">{COMPANY.heroSubtext}</p>
+        - CTA: <div className="mt-8 flex flex-col sm:flex-row gap-4">
+          - <Button href="#services" showArrow>Our Services</Button>
+          - <Button href="#contact" variant="secondary">Get Free Quote</Button>
+        - Note: On mobile, buttons should be w-full sm:w-auto
+
+      Run npm run build.
+
+      Testing note: When writing tests for this component, focus on smoke tests:
+      - Renders hero tagline from COMPANY.tagline
+      - Renders "Our Services" CTA button with href="#services"
+      - Renders "Get Free Quote" CTA button with href="#contact"
+      - Background image is present
+
+  - title: "Build the About section with two-column layout"
+    completed: false
+    description: |
+      Create src/components/sections/About.tsx.
+
+      First, download the about section image:
+        curl -L "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&q=80" -o public/images/about-workers.jpg
+      If that fails, try:
+        curl -L "https://images.unsplash.com/photo-1574170609400-52b41cc721e7?w=800&q=80" -o public/images/about-workers.jpg
+      We need construction workers reviewing plans or at a job site.
+
+      Import: COMPANY, STATS from "@/lib/constants", Image from "next/image", SectionWrapper from "@/components/ui/SectionWrapper", SectionHeading from "@/components/ui/SectionHeading", Button from "@/components/ui/Button".
+
+      Structure:
+      <SectionWrapper id="about" background="light">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+      Left column — Image:
+      - <div className="relative">
+        - <div className="relative aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] rounded-lg overflow-hidden">
+          - <Image src="/images/about-workers.jpg" alt="IronPeak construction team reviewing project plans" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
+        - Decorative accent: <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-brand-red rounded-lg -z-10" /> (positioned behind the image)
+        - The parent div needs relative positioning for this to work
+
+      Right column — Content:
+      - <SectionHeading tag="ABOUT IRONPEAK CONSTRUCTION" title="Experts In Modern Construction Services & Solutions" />
+      - <p className="text-brand-gray-500 text-base leading-relaxed mt-6">{COMPANY.aboutText}</p>
+      - <p className="text-brand-gray-500 text-base leading-relaxed mt-4">{COMPANY.aboutText2}</p>
+
+      Stats row:
+      - <div className="flex items-center mt-8 divide-x divide-brand-gray-300">
+      - Map STATS to:
+        <div className="px-6 first:pl-0 last:pr-0" key={stat.label}>
+          <div className="text-brand-black text-3xl font-heading font-bold">{stat.value}</div>
+          <div className="text-brand-gray-500 text-sm mt-1">{stat.label}</div>
+        </div>
+
+      CTA:
+      - <div className="mt-8">
+        - <Button href="#services" variant="secondary" showArrow>Discover More</Button>
+
+      Run npm run build.
+
+      Testing note: When writing tests for this component, focus on smoke tests:
+      - Renders all 3 stats with correct values ("10+", "500+", "100%")
+      - Renders about text from COMPANY.aboutText
+      - Renders section heading "Experts In Modern Construction Services & Solutions"
+      - Renders "Discover More" CTA button
+
+  - title: "Build the Services section with 6 service cards"
+    completed: false
+    description: |
+      Create src/components/sections/Services.tsx.
+
+      This is the intentional challenge section. Design a clean, professional service card grid inspired by metropolitan-interiors.vercel.app.
+
+      First, download all 6 service images:
+        curl -L "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80" -o public/images/services/residential.jpg
+        curl -L "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80" -o public/images/services/remodeling.jpg
+        curl -L "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80" -o public/images/services/commercial.jpg
+        curl -L "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&q=80" -o public/images/services/design-build.jpg
+        curl -L "https://images.unsplash.com/photo-1590496793929-36417d3117de?w=600&q=80" -o public/images/services/structural.jpg
+        curl -L "https://images.unsplash.com/photo-1664575602554-2087b04935a5?w=600&q=80" -o public/images/services/consulting.jpg
+      If any URL fails, find a similar construction image from Unsplash.
+
+      Import: SERVICES from "@/lib/constants", SectionWrapper from "@/components/ui/SectionWrapper", SectionHeading from "@/components/ui/SectionHeading", Card from "@/components/ui/Card", { Home, Hammer, Building2, PenTool, Boxes, ClipboardList, ArrowRight } from "lucide-react".
+
+      Create an icon mapping object at the top of the file:
+      ```typescript
+      const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+        Home, Hammer, Building2, PenTool, Boxes, ClipboardList,
+      };
+      ```
+
+      Structure:
+      <SectionWrapper id="services">
+        <SectionHeading
+          tag="WHAT WE OFFER"
+          title="Our Construction Services"
+          subtitle="From residential builds to commercial projects, IronPeak delivers comprehensive construction solutions backed by a decade of Bay Area experience."
+          centered
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+          Map SERVICES to:
+          ```tsx
+          <Card key={service.title} image={service.image} imageAlt={service.title}>
+            {(() => {
+              const IconComponent = iconMap[service.icon];
+              return IconComponent ? <IconComponent size={28} className="text-brand-red" /> : null;
+            })()}
+            <h3 className="font-heading text-xl font-semibold text-brand-black mt-3">{service.title}</h3>
+            <p className="text-brand-gray-500 text-[15px] leading-relaxed mt-2">{service.description}</p>
+            <a href="#contact" className="inline-flex items-center gap-1.5 text-brand-red font-medium text-sm mt-4 hover:gap-3 transition-all duration-300">
+              Learn More <ArrowRight size={16} />
+            </a>
+          </Card>
+          ```
+        </div>
+      </SectionWrapper>
+
+      The icon rendering approach: create the mapping object as shown above so each service's icon string maps to the actual Lucide component. Render it dynamically.
+
+      Run npm run build.
+
+      Testing note: When writing tests for this component, focus on smoke tests:
+      - Renders exactly 6 service cards
+      - Each card has a title from SERVICES array
+      - Section heading "Our Construction Services" is present
+      - Each card has a "Learn More" link with href="#contact"
+
+  # ═══════════════════════════════════════════════
+  # PHASE 4: ASSEMBLY + TESTING + POLISH (Tasks 11-15)
+  # ═══════════════════════════════════════════════
+
+  - title: "Assemble the full page and verify build"
+    completed: false
+    description: |
+      Wire all components together in the main page.
+
+      Update src/app/page.tsx:
+      ```tsx
+      import { Navbar } from "@/components/layout/Navbar";
+      import { Hero } from "@/components/sections/Hero";
+      import { About } from "@/components/sections/About";
+      import { Services } from "@/components/sections/Services";
+      import { Footer } from "@/components/layout/Footer";
+
+      export default function HomePage() {
+        return (
+          <>
+            <Navbar />
+            <main>
+              <Hero />
+              <About />
+              <Services />
+            </main>
+            <Footer />
+          </>
+        );
+      }
+      ```
+
+      Verify next.config.ts/next.config.mjs is reasonable — it should NOT have any restrictive image configuration since we're using local images from public/. Remove any experimental flags that might cause issues.
+
+      Run npm run build and fix ALL TypeScript errors. Common issues:
+      - Missing 'use client' on components using hooks (Navbar)
+      - Import path mismatches (check @/ alias works)
+      - Image paths should start with /images/ (files are in public/images/)
+      - Tailwind brand-* classes should resolve if the theme is configured correctly in globals.css
+      - lucide-react icon name mismatches
+
+      If build passes, run npm run dev and verify the dev server starts on port 3000.
+
+      Testing note: When writing tests for the assembled page, focus on smoke tests in src/app/page.test.tsx:
+      - Page renders without crashing
+      - All major sections are present (nav, hero, about, services, footer)
+
+  - title: "Fix any build errors and verify all images display"
+    completed: false
+    description: |
+      Stabilization task. Run npm run build and npm run dev, then verify everything works.
+
+      1. Check all images exist and have non-zero file sizes:
+         ls -la public/images/
+         ls -la public/images/services/
+         For any missing or zero-byte images, re-download replacements from Unsplash using curl.
+         Key images needed:
+         - public/images/logo.png (should already exist from task 3)
+         - public/images/hero-bg.jpg (wide construction site)
+         - public/images/about-workers.jpg (workers reviewing plans)
+         - public/images/services/residential.jpg
+         - public/images/services/remodeling.jpg
+         - public/images/services/commercial.jpg
+         - public/images/services/design-build.jpg
+         - public/images/services/structural.jpg
+         - public/images/services/consulting.jpg
+
+      2. If Tailwind custom colors are not being applied (brand-red, brand-black, etc.):
+         - For Tailwind v4: Check globals.css has @theme { } block with --color-brand-* variables
+         - For Tailwind v3: Check tailwind.config.ts has theme.extend.colors.brand
+         - Test by looking for the CSS output in .next/static/css/
+
+      3. If fonts are not loading:
+         - Verify next/font/google imports in layout.tsx
+         - Check CSS variables --font-outfit and --font-inter are on <html>
+         - Verify globals.css body/heading font-family rules
+
+      4. Fix any remaining TypeScript errors.
+
+      5. Verify: Navbar renders with logo + links, Hero has background image with overlay, About has two columns with image and text, Services shows 6 cards in a grid, Footer has 4 columns + newsletter.
+
+      Run npm run build one final time — must succeed with zero errors.
+
+  - title: "Write Playwright E2E test suite"
+    completed: false
+    description: |
+      Dedicated E2E testing milestone. This task writes ONLY Playwright test files — no component code changes.
+
+      Write Playwright tests for comprehensive end-to-end coverage. All test files go in the e2e/ directory:
+
+      1. **e2e/sections.spec.ts** — Section rendering tests:
+         - All major sections render correctly (nav, #home, #about, #services, footer)
+         - Hero section contains tagline text
+         - Hero section has "Our Services" and "Get Free Quote" CTAs
+         - About section displays all 3 stats ("10+", "500+", "100%")
+         - About section contains about text content
+         - Services section displays exactly 6 service cards with titles
+         - Footer contains contact info (phone, email, address)
+         - Footer has newsletter input field
+         - Footer displays all 4 section headings
+
+      2. **e2e/navigation.spec.ts** — Navigation functionality tests:
+         - Clicking nav links scrolls to correct sections
+         - All nav link hrefs start with '#' (anchor links)
+         - "Get Free Quote" button navigates to #contact
+         - Mobile menu opens when hamburger is clicked
+         - Mobile menu closes when close button is clicked
+         - Clicking mobile nav links closes the menu
+
+      3. **e2e/mobile.spec.ts** — Mobile-specific tests (use mobile viewport):
+         - Hamburger menu button is visible on mobile
+         - Desktop nav links are hidden on mobile
+         - Mobile menu opens and displays all nav links
+         - Mobile menu closes correctly
+         - No horizontal overflow on mobile viewport
+
+      4. **e2e/responsive.spec.ts** — Responsive layout tests:
+         - Services grid adapts correctly (1 column mobile, 2 columns tablet, 3 columns desktop)
+         - About section stacks vertically on mobile
+         - Footer columns stack on mobile
+         - Hero buttons stack vertically on mobile
+         - Logo scales appropriately across breakpoints
+
+      5. **e2e/accessibility.spec.ts** — Accessibility tests using @axe-core/playwright:
+         - Run axe-core WCAG 2.0 AA scan on homepage (zero violations)
+         - All images have descriptive alt text
+         - All interactive elements have accessible names
+         - Exactly one h1 element on the page
+         - Sequential heading hierarchy (h1 → h2 → h3, no skips)
+         - All links have href attributes
+         - All buttons have accessible labels
+
+      Configure Playwright tests to run against the built production site (npm run build && npm run start).
+
+      After writing tests, verify they all pass across all 3 projects (Desktop Chrome, Pixel 5, iPad):
+        npx playwright test --reporter=line
+
+      Then verify the full CI suite passes:
+        npm run test:ci
+
+      Expected result: All E2E tests pass across all 3 browser projects, unit tests pass, build succeeds, lint passes.
+
+  - title: "Responsive polish across all breakpoints"
+    completed: false
+    description: |
+      Review and refine responsive behavior. Check all Tailwind responsive classes.
+
+      NAVBAR (src/components/layout/Navbar.tsx):
+      - Mobile (< lg): Hamburger visible, nav links hidden, mobile menu works
+      - Logo: h-8 on mobile, h-10 on desktop (sm:h-10)
+      - Ensure mobile menu covers full screen and has close button
+      - Nav links in mobile menu should close the menu when clicked
+
+      HERO (src/components/sections/Hero.tsx):
+      - Mobile: text-3xl sm:text-4xl (heading), text-base (subtext)
+      - pt-20 on mobile for fixed navbar offset
+      - Buttons: flex-col on mobile (full width), flex-row on sm+
+      - Make buttons w-full sm:w-auto if not already
+      - min-h-[80vh] sm:min-h-screen to prevent overly tall hero on small phones
+
+      ABOUT (src/components/sections/About.tsx):
+      - Mobile: Single column, image comes first naturally
+      - Image: aspect-[4/3] on mobile, aspect-[4/5] on lg
+      - Stats: On very small screens, ensure they don't overflow. Consider flex-wrap
+      - Decorative red square: hidden on mobile (hidden lg:block)
+
+      SERVICES (src/components/sections/Services.tsx):
+      - grid-cols-1 on mobile, md:grid-cols-2, lg:grid-cols-3
+      - Cards should have consistent heights: add h-full to Card, flex flex-col on content area, flex-grow on description
+      - Gap: gap-6 on mobile, gap-8 on desktop
+
+      FOOTER (src/components/layout/Footer.tsx):
+      - grid-cols-1 sm:grid-cols-2 lg:grid-cols-4
+      - Newsletter input: w-full on mobile, md:w-64 on desktop
+      - Social icons: justify-center on mobile, justify-end on desktop
+      - Copyright: text-center on mobile
+
+      GLOBAL:
+      - Add overflow-x-hidden to the body or html element to prevent horizontal scroll
+      - Ensure all touch targets >= 44x44px (check mobile nav links, buttons, social icons)
+      - No text smaller than 13px on mobile
+
+      Run npm run build after making changes.
+
+  - title: "Add animations, micro-interactions, and final design polish"
+    completed: false
+    description: |
+      Add professional polish to elevate the design quality.
+
+      1. SCROLL ANIMATIONS:
+         Create src/hooks/useScrollAnimation.ts:
+         ```typescript
+         "use client";
+         import { useEffect, useRef, useState } from "react";
+
+         export function useScrollAnimation(threshold = 0.1) {
+           const ref = useRef<HTMLDivElement>(null);
+           const [isVisible, setIsVisible] = useState(false);
+
+           useEffect(() => {
+             const observer = new IntersectionObserver(
+               ([entry]) => {
+                 if (entry.isIntersecting) {
+                   setIsVisible(true);
+                   observer.unobserve(entry.target);
+                 }
+               },
+               { threshold }
+             );
+             if (ref.current) observer.observe(ref.current);
+             return () => observer.disconnect();
+           }, [threshold]);
+
+           return { ref, isVisible };
+         }
+         ```
+
+         Add CSS keyframe in globals.css:
+         ```css
+         @keyframes fadeInUp {
+           from { opacity: 0; transform: translateY(24px); }
+           to { opacity: 1; transform: translateY(0); }
+         }
+         ```
+
+         Apply to About and Services sections: wrap content in a div with ref from useScrollAnimation, and conditionally apply the animation:
+         className={`transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+
+         For service cards, add staggered delays: style={{ transitionDelay: `${index * 100}ms` }}
+         Mark About.tsx and Services.tsx as 'use client' if they now use the hook.
+
+      2. HOVER MICRO-INTERACTIONS (verify these exist):
+         - Service cards: image scale on hover (group-hover:scale-105) ✓ (from Card component)
+         - Service "Learn More": arrow gap transition (hover:gap-3) ✓
+         - Nav links: underline grow animation (after pseudo) ✓
+         - Buttons: subtle lift (hover:-translate-y-0.5) ✓
+         - Footer links: color transition ✓
+
+      3. VISUAL POLISH:
+         - Verify the red accent strip on service cards renders (h-1 bg-brand-red in Card)
+         - Verify consistent section spacing (SectionWrapper handles py-16/20/24)
+         - Verify font-heading applied to ALL headings (h1-h6)
+         - Verify font-body applied to body text
+         - Check color contrast: white on #C41E2A = 4.63:1 ratio (passes AA for large text)
+
+      4. PERFORMANCE:
+         - Hero image should have priority prop on next/image
+         - Service images should have proper sizes attribute
+         - Verify no layout shift (images have explicit dimensions or aspect ratios)
+
+      Run npm run build.
+
+  # ═══════════════════════════════════════════════
+  # PHASE 5: BONUS SECTIONS (Tasks 16-18)
+  # ═══════════════════════════════════════════════
+
+  - title: "Build the CTA Banner section"
+    completed: false
+    description: |
+      Create src/components/sections/CTABanner.tsx — a reusable call-to-action banner.
+
+      This demonstrates the reusable component architecture. Use SectionWrapper with dark background.
+
+      Download a CTA background image:
+        curl -L "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" -o public/images/cta-bg.jpg
+      This should be an architectural/construction wide shot.
+
+      Structure:
+      <section className="relative py-20 md:py-28">
+        <Image src="/images/cta-bg.jpg" alt="" fill className="object-cover" sizes="100vw" />
+        <div className="absolute inset-0 bg-brand-black/80" />
+        <Container className="relative z-10 text-center">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-white leading-tight">
+            Ready to Start Your Next Project?
+          </h2>
+          <p className="text-gray-300 text-lg mt-4 max-w-2xl mx-auto">
+            Get in touch with our team for a free consultation and detailed project estimate. No surprises, no hidden costs.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <Button href="#contact" showArrow>Get Free Quote</Button>
+            <Button href="tel:4085550198" variant="secondary">Call (408) 555-0198</Button>
+          </div>
+        </Container>
+      </section>
+
+      Import: Image, Container, Button.
+
+      Add CTABanner to page.tsx between Services and Footer:
+      ```tsx
+      import { CTABanner } from "@/components/sections/CTABanner";
+      // ... in the return:
+      <Services />
+      <CTABanner />
+      <Footer />
+      ```
+
+      Run npm run build.
+
+  - title: "Build the How It Works process section"
+    completed: false
+    description: |
+      Create src/components/sections/HowItWorks.tsx — a 4-step process section.
+
+      Import: PROCESS_STEPS from "@/lib/constants", SectionWrapper from "@/components/ui/SectionWrapper", SectionHeading from "@/components/ui/SectionHeading".
+
+      Structure:
+      <SectionWrapper id="process" background="light">
+        <SectionHeading
+          tag="OUR PROCESS"
+          title="How It Works"
+          subtitle="A structured approach to every project — from first meeting to final walkthrough."
+          centered
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+          Map PROCESS_STEPS to:
+          <div key={step.number} className="text-center lg:text-left">
+            <div className="text-brand-red text-5xl font-heading font-extrabold opacity-20">{step.number}</div>
+            <h3 className="font-heading text-xl font-semibold text-brand-black mt-2">{step.title}</h3>
+            <p className="text-brand-gray-500 text-sm leading-relaxed mt-2">{step.description}</p>
+          </div>
+        </div>
+      </SectionWrapper>
+
+      Add HowItWorks to page.tsx between About and Services:
+      ```tsx
+      import { HowItWorks } from "@/components/sections/HowItWorks";
+      // ... in the return:
+      <About />
+      <HowItWorks />
+      <Services />
+      ```
+
+      Run npm run build.
+
+  - title: "Build the FAQ section and final build verification"
+    completed: false
+    description: |
+      Create src/components/sections/FAQ.tsx — an accordion FAQ section.
+
+      Add 'use client' (uses useState for accordion state).
+
+      Import: FAQ_ITEMS from "@/lib/constants", SectionWrapper from "@/components/ui/SectionWrapper", SectionHeading from "@/components/ui/SectionHeading", { ChevronDown } from "lucide-react".
+
+      Structure:
+      <SectionWrapper id="faq">
+        <SectionHeading
+          tag="FAQ"
+          title="Frequently Asked Questions"
+          subtitle="Common questions about working with IronPeak Construction Group."
+          centered
+        />
+        <div className="max-w-3xl mx-auto mt-12 divide-y divide-brand-gray-100">
+          Map FAQ_ITEMS to an AccordionItem. Use useState with openIndex (number | null).
+
+          Each item:
+          <div key={index}>
+            <button
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              className="w-full flex justify-between items-center py-5 text-left"
+            >
+              <span className="font-heading font-semibold text-brand-black text-lg pr-4">{item.question}</span>
+              <ChevronDown
+                size={20}
+                className={`text-brand-gray-500 transition-transform duration-300 flex-shrink-0 ${openIndex === index ? "rotate-180" : ""}`}
+              />
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ${openIndex === index ? "max-h-40 pb-5" : "max-h-0"}`}>
+              <p className="text-brand-gray-500 text-base leading-relaxed">{item.answer}</p>
+            </div>
+          </div>
+        </div>
+      </SectionWrapper>
+
+      Add FAQ to page.tsx between CTABanner and Footer:
+      ```tsx
+      import { FAQ } from "@/components/sections/FAQ";
+      // ... in the return:
+      <CTABanner />
+      <FAQ />
+      <Footer />
+      ```
+
+      FINAL COMPREHENSIVE VERIFICATION:
+      1. Run npm run lint — fix any issues
+      2. Run npm run build — must pass with zero errors
+      3. Remove any leftover Next.js template content
+      4. Remove unused imports and commented-out code
+      5. Verify file structure matches the architecture:
+         src/components/ui/ — Button, Container, SectionWrapper, SectionHeading, Card
+         src/components/layout/ — Navbar, Footer
+         src/components/sections/ — Hero, About, Services, CTABanner, HowItWorks, FAQ
+         src/hooks/ — useScrollAnimation
+         src/lib/ — constants, types
+         e2e/ — All Playwright test specs
+         scripts/ — test-ci.sh
+      6. Ensure .gitignore includes: node_modules, .next, .env*, test-results/, playwright-report/
+      7. Create README.md with:
+         # IronPeak Construction Group
+         Marketing website for IronPeak Construction Group — a full-service construction company in San Jose, CA.
+         ## Tech Stack
+         - Next.js 15 (App Router)
+         - TypeScript (strict mode)
+         - Tailwind CSS
+         - Lucide React Icons
+         - Vitest + @testing-library/react (unit tests)
+         - Playwright (E2E tests)
+         ## Getting Started
+         npm install && npm run dev
+         Open http://localhost:3000
+         ## Testing
+         npm run test:ci      # Full suite (build + lint + unit + e2e)
+         npm run test:unit    # Unit tests only
+         npm run test:e2e     # E2E tests only
+
+      Run the FULL test suite to verify everything passes:
+        npm run build && npm run lint && npx vitest run --reporter=verbose && npx playwright test --reporter=line && npm run test:ci
+
+      All tests must pass before considering this task complete.
