@@ -10,6 +10,7 @@ test.describe("Section rendering", () => {
     await expect(page.locator("#home")).toBeVisible();
     await expect(page.locator("#about")).toBeVisible();
     await expect(page.locator("#services")).toBeVisible();
+    await expect(page.locator("#faq")).toBeVisible();
     await expect(page.locator("footer")).toBeVisible();
   });
 
@@ -66,6 +67,54 @@ test.describe("Section rendering", () => {
     for (const title of titles) {
       await expect(services.getByText(title)).toBeVisible();
     }
+  });
+
+  test("FAQ section renders all 6 questions", async ({ page }) => {
+    const faq = page.locator("#faq");
+    await expect(
+      faq.getByText("Frequently Asked Questions")
+    ).toBeVisible();
+    const buttons = faq.locator("button");
+    await expect(buttons).toHaveCount(6);
+  });
+
+  test("FAQ accordion opens and closes on click", async ({ page }) => {
+    const faq = page.locator("#faq");
+    const firstButton = faq.locator("button").first();
+    const firstAnswer = faq
+      .getByText("We serve the entire Bay Area")
+      .locator("..");
+
+    // Initially collapsed
+    await expect(firstAnswer).toHaveClass(/max-h-0/);
+
+    // Click to open
+    await firstButton.click();
+    await expect(firstAnswer).toHaveClass(/max-h-40/);
+
+    // Click again to close
+    await firstButton.click();
+    await expect(firstAnswer).toHaveClass(/max-h-0/);
+  });
+
+  test("FAQ accordion only shows one answer at a time", async ({ page }) => {
+    const faq = page.locator("#faq");
+    const buttons = faq.locator("button");
+    const firstAnswer = faq
+      .getByText("We serve the entire Bay Area")
+      .locator("..");
+    const secondAnswer = faq
+      .getByText("Timelines vary by scope")
+      .locator("..");
+
+    // Open first item
+    await buttons.nth(0).click();
+    await expect(firstAnswer).toHaveClass(/max-h-40/);
+
+    // Open second item — first should close
+    await buttons.nth(1).click();
+    await expect(firstAnswer).toHaveClass(/max-h-0/);
+    await expect(secondAnswer).toHaveClass(/max-h-40/);
   });
 
   test("Footer contains contact info (phone, email, address)", async ({

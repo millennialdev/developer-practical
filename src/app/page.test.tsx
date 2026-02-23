@@ -21,12 +21,13 @@ describe("HomePage", () => {
     expect(navs.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders the main content area with hero, about, and services sections", () => {
+  it("renders the main content area with hero, about, services, and faq sections", () => {
     const { container } = render(<HomePage />);
     expect(screen.getByRole("main")).toBeInTheDocument();
     expect(container.querySelector("#home")).toBeInTheDocument();
     expect(container.querySelector("#about")).toBeInTheDocument();
     expect(container.querySelector("#services")).toBeInTheDocument();
+    expect(container.querySelector("#faq")).toBeInTheDocument();
   });
 
   it("renders the Footer", () => {
