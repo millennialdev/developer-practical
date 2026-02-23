@@ -8,10 +8,11 @@ tasks:
         description: |
               Set up a new Next.js 15 project in the current directory from scratch.
 
-              IMPORTANT: First, initialize git for this project:
+              IMPORTANT: Ensure git is initialized for this project. If not already set up:
                 git init
                 git branch -M main
-                git remote add origin https://github.com/millennialdev/developer-practical.git
+                git remote set-url origin https://github.com/millennialdev/developer-practical.git || git remote add origin https://github.com/millennialdev/developer-practical.git
+              If git is already initialized with the correct remote, skip these commands and proceed.
 
               Then scaffold the Next.js project:
                 npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --no-turbopack --import-alias "@/*"
