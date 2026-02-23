@@ -12,6 +12,7 @@ export const COMPANY = {
   phone: "(408) 555-0198",
   email: "info@ironpeakcg.com",
   address: "San Jose, California",
+  mapsUrl: "https://www.google.com/maps/place/San+Jose,+CA",
   founded: "2014",
   serviceArea:
     "Bay Area (San Jose, Santa Clara, Sunnyvale, Palo Alto, Fremont)",

@@ -2,7 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "white";
   href?: string;
   className?: string;
   showArrow?: boolean;
@@ -24,6 +24,8 @@ export function Button({
       "bg-brand-red text-white hover:bg-brand-red-dark hover:-translate-y-0.5",
     secondary:
       "border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white hover:-translate-y-0.5",
+    white:
+      "bg-white text-brand-red hover:bg-gray-50 hover:-translate-y-0.5",
   };
   const classes = `${base} ${variants[variant]} ${className}`;
 
