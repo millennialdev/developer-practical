@@ -145,6 +145,17 @@ export const PROCESS_STEPS: ProcessStep[] = [
   },
 ];
 
+export const CTA = {
+  heading: "Ready to Start Your Next Project?",
+  subtext:
+    "Get in touch with our team for a free consultation and detailed project estimate. No surprises, no hidden costs.",
+  primaryLabel: "Get Free Quote",
+  primaryHref: "#contact",
+  secondaryLabel: `Call ${COMPANY.phone}`,
+  secondaryHref: `tel:${COMPANY.phone.replace(/[^+\d]/g, "")}`,
+  backgroundImage: "/images/cta-bg.jpg",
+} as const;
+
 export const FAQ_ITEMS: FAQItem[] = [
   {
     question: "What areas do you serve?",
