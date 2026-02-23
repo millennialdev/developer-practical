@@ -35,4 +35,28 @@ describe("Hero", () => {
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute("src", "/images/hero-bg.jpg");
   });
+
+  it("uses responsive min-height (80vh mobile, screen on sm+)", () => {
+    const { container } = render(<Hero />);
+    const section = container.querySelector("section#home");
+    expect(section?.className).toContain("min-h-[80vh]");
+    expect(section?.className).toContain("sm:min-h-screen");
+  });
+
+  it("heading uses responsive text sizes (text-3xl base, sm:text-4xl)", () => {
+    render(<Hero />);
+    const heading = screen.getByText(COMPANY.tagline);
+    expect(heading.className).toContain("text-3xl");
+    expect(heading.className).toContain("sm:text-4xl");
+  });
+
+  it("buttons are full-width on mobile and auto on sm+", () => {
+    render(<Hero />);
+    const servicesBtn = screen.getByText("Our Services").closest("a");
+    const quoteBtn = screen.getByText("Get Free Quote").closest("a");
+    expect(servicesBtn?.className).toContain("w-full");
+    expect(servicesBtn?.className).toContain("sm:w-auto");
+    expect(quoteBtn?.className).toContain("w-full");
+    expect(quoteBtn?.className).toContain("sm:w-auto");
+  });
 });

@@ -29,7 +29,7 @@ export function Navbar() {
               alt="IronPeak Construction Group"
               height={40}
               width={160}
-              className="h-10 w-auto"
+              className="h-8 sm:h-10 w-auto"
               priority
             />
           </div>
@@ -57,7 +57,7 @@ export function Navbar() {
 
         {/* Mobile Hamburger */}
         <button
-          className="lg:hidden"
+          className="lg:hidden flex items-center justify-center min-h-[44px] min-w-[44px]"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
@@ -82,14 +82,14 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-white text-xl font-medium py-3 hover:text-brand-red transition-colors"
+              className="text-white text-xl font-medium py-3 min-h-[44px] hover:text-brand-red transition-colors"
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
             </a>
           ))}
         </nav>
-        <Button variant="primary" href="#contact" showArrow>
+        <Button variant="primary" href="#contact" showArrow onClick={() => setMobileOpen(false)}>
           Get Free Quote
         </Button>
       </div>

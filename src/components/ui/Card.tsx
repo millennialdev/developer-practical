@@ -17,7 +17,7 @@ export function Card({
 }: CardProps) {
   return (
     <article
-      className={`group bg-white rounded-lg overflow-hidden border border-brand-gray-100 ${hoverEffect ? "shadow-sm hover:shadow-xl transition-all duration-300" : ""} ${className}`}
+      className={`group h-full flex flex-col bg-white rounded-lg overflow-hidden border border-brand-gray-100 ${hoverEffect ? "shadow-sm hover:shadow-xl transition-all duration-300" : ""} ${className}`}
     >
       {image && (
         <div className="relative aspect-[4/3] overflow-hidden">
@@ -31,7 +31,7 @@ export function Card({
         </div>
       )}
       <div className="h-1 w-full bg-brand-red" />
-      <div className="p-6">{children}</div>
+      <div className="p-6 flex flex-col grow">{children}</div>
     </article>
   );
 }

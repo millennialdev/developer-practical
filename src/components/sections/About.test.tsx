@@ -36,4 +36,32 @@ describe("About", () => {
     const link = screen.getByText("Discover More").closest("a");
     expect(link).toHaveAttribute("href", "#services");
   });
+
+  it("image uses responsive aspect ratios (4/3 mobile, 4/5 on lg)", () => {
+    const { container } = render(<About />);
+    const imageWrapper = container.querySelector("[class*='aspect-']");
+    expect(imageWrapper?.className).toContain("aspect-[4/3]");
+    expect(imageWrapper?.className).toContain("lg:aspect-[4/5]");
+  });
+
+  it("decorative red square is hidden on mobile", () => {
+    const { container } = render(<About />);
+    const decorSquare = container.querySelector(".bg-brand-red.-z-10");
+    expect(decorSquare?.className).toContain("hidden");
+    expect(decorSquare?.className).toContain("lg:block");
+  });
+
+  it("stats row supports flex-wrap for small screens", () => {
+    const { container } = render(<About />);
+    const statsRow = container.querySelector("[class*='flex-wrap']");
+    expect(statsRow).toBeInTheDocument();
+    expect(statsRow?.className).toContain("flex-wrap");
+  });
+
+  it("stats use responsive text sizes", () => {
+    render(<About />);
+    const statValue = screen.getByText("10+");
+    expect(statValue.className).toContain("text-2xl");
+    expect(statValue.className).toContain("sm:text-3xl");
+  });
 });

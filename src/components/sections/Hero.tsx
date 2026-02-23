@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 
 export function Hero() {
   return (
-    <section id="home" className="relative min-h-screen flex items-center pt-20">
+    <section id="home" className="relative min-h-[80vh] sm:min-h-screen flex items-center pt-20">
       <Image
         src="/images/hero-bg.jpg"
         alt="Construction site"
@@ -21,7 +21,7 @@ export function Hero() {
           <span className="text-brand-red font-semibold text-sm tracking-widest uppercase font-body">
             Residential &amp; Commercial Construction
           </span>
-          <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-heading font-extrabold text-white leading-[1.1] mt-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-[56px] font-heading font-extrabold text-white leading-[1.1] mt-4">
             {COMPANY.tagline}
           </h1>
           <p className="text-white/80 text-base sm:text-lg mt-6 max-w-xl leading-relaxed font-body">

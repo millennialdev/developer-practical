@@ -57,4 +57,20 @@ describe("Card", () => {
     const article = container.querySelector("article");
     expect(article?.className).toContain("mt-6");
   });
+
+  it("has h-full and flex flex-col for consistent grid heights", () => {
+    const { container } = render(<Card>Flex</Card>);
+    const article = container.querySelector("article");
+    expect(article?.className).toContain("h-full");
+    expect(article?.className).toContain("flex");
+    expect(article?.className).toContain("flex-col");
+  });
+
+  it("content area uses flex-col grow for consistent card heights", () => {
+    const { container } = render(<Card>Growing</Card>);
+    const contentDiv = container.querySelector(".p-6");
+    expect(contentDiv?.className).toContain("flex");
+    expect(contentDiv?.className).toContain("flex-col");
+    expect(contentDiv?.className).toContain("grow");
+  });
 });

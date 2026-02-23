@@ -66,4 +66,21 @@ describe("Button", () => {
     expect(el.className).toContain("focus:ring-2");
     expect(el.className).toContain("focus:ring-brand-red");
   });
+
+  it("has minimum 44px touch target height", () => {
+    render(<Button>Touch</Button>);
+    const el = screen.getByRole("button", { name: "Touch" });
+    expect(el.className).toContain("min-h-[44px]");
+  });
+
+  it("calls onClick on anchor element when href and onClick are both provided", () => {
+    const handler = vi.fn();
+    render(
+      <Button href="#test" onClick={handler}>
+        Link Click
+      </Button>
+    );
+    fireEvent.click(screen.getByRole("link", { name: "Link Click" }));
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
 });

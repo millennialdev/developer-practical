@@ -40,7 +40,7 @@ export function Footer() {
       {/* Main Content */}
       <div className="border-t border-gray-800">
         <Container className="py-16 md:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
             {/* Column 1 — About Company */}
             <div>
               <h4 className="font-heading text-lg font-semibold mb-6">
@@ -52,19 +52,19 @@ export function Footer() {
               <div className="mt-6 flex flex-col gap-3">
                 <a
                   href={`tel:${COMPANY.phone}`}
-                  className="flex items-center gap-2 text-gray-400 text-sm hover:text-brand-red transition-colors"
+                  className="flex items-center gap-2 text-gray-400 text-sm min-h-[44px] hover:text-brand-red transition-colors"
                 >
                   <Phone size={16} />
                   {COMPANY.phone}
                 </a>
                 <a
                   href={`mailto:${COMPANY.email}`}
-                  className="flex items-center gap-2 text-gray-400 text-sm hover:text-brand-red transition-colors"
+                  className="flex items-center gap-2 text-gray-400 text-sm min-h-[44px] hover:text-brand-red transition-colors"
                 >
                   <Mail size={16} />
                   {COMPANY.email}
                 </a>
-                <span className="flex items-center gap-2 text-gray-400 text-sm hover:text-brand-red transition-colors">
+                <span className="flex items-center gap-2 text-gray-400 text-sm min-h-[44px]">
                   <MapPin size={16} />
                   {COMPANY.address}
                 </span>
@@ -128,34 +128,34 @@ export function Footer() {
       {/* Copyright Bar */}
       <div className="border-t border-gray-800 py-6">
         <Container className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm text-center md:text-left">
             &copy; 2026 IronPeak Construction Group. All rights reserved.
           </p>
-          <div className="flex gap-4">
+          <div className="flex justify-center md:justify-end gap-2">
             <a
               href="#"
-              className="text-gray-500 hover:text-brand-red transition-colors"
+              className="flex items-center justify-center min-h-[44px] min-w-[44px] text-gray-500 hover:text-brand-red transition-colors"
               aria-label="Facebook"
             >
               <Facebook size={18} />
             </a>
             <a
               href="#"
-              className="text-gray-500 hover:text-brand-red transition-colors"
+              className="flex items-center justify-center min-h-[44px] min-w-[44px] text-gray-500 hover:text-brand-red transition-colors"
               aria-label="Twitter"
             >
               <Twitter size={18} />
             </a>
             <a
               href="#"
-              className="text-gray-500 hover:text-brand-red transition-colors"
+              className="flex items-center justify-center min-h-[44px] min-w-[44px] text-gray-500 hover:text-brand-red transition-colors"
               aria-label="Instagram"
             >
               <Instagram size={18} />
             </a>
             <a
               href="#"
-              className="text-gray-500 hover:text-brand-red transition-colors"
+              className="flex items-center justify-center min-h-[44px] min-w-[44px] text-gray-500 hover:text-brand-red transition-colors"
               aria-label="LinkedIn"
             >
               <Linkedin size={18} />

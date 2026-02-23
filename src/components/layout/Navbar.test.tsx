@@ -93,4 +93,50 @@ describe("Navbar", () => {
     // Menu should close
     expect(menuContainer?.className).toContain("opacity-0");
   });
+
+  it("logo has responsive height classes (h-8 mobile, sm:h-10 desktop)", () => {
+    render(<Navbar />);
+    const logo = screen.getByAltText("IronPeak Construction Group");
+    expect(logo.className).toContain("h-8");
+    expect(logo.className).toContain("sm:h-10");
+  });
+
+  it("hamburger button has minimum 44x44px touch target", () => {
+    render(<Navbar />);
+    const hamburger = screen.getByLabelText("Open menu");
+    expect(hamburger.className).toContain("min-h-[44px]");
+    expect(hamburger.className).toContain("min-w-[44px]");
+  });
+
+  it("mobile nav links have minimum 44px touch target height", () => {
+    render(<Navbar />);
+    const mobileLink = screen
+      .getAllByText("Home")
+      .find((el) => el.closest("[class*='fixed top-20']"));
+    expect(mobileLink?.className).toContain("min-h-[44px]");
+  });
+
+  it("mobile CTA button closes menu when clicked", () => {
+    render(<Navbar />);
+
+    const openButton = screen.getByLabelText("Open menu");
+    fireEvent.click(openButton);
+
+    const menuContainer = screen
+      .getAllByText("Home")
+      .find((el) => el.closest("[class*='fixed top-20']"))
+      ?.closest("[class*='fixed top-20']");
+    expect(menuContainer?.className).toContain("opacity-100");
+
+    // Click the mobile CTA
+    const mobileCtas = screen.getAllByText("Get Free Quote");
+    const mobileCta = mobileCtas.find((el) =>
+      el.closest("[class*='fixed top-20']")
+    );
+    if (mobileCta) {
+      fireEvent.click(mobileCta);
+    }
+
+    expect(menuContainer?.className).toContain("opacity-0");
+  });
 });

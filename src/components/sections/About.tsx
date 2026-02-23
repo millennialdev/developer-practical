@@ -10,7 +10,7 @@ export function About() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         {/* Left column — Image */}
         <div className="relative">
-          <div className="relative aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] rounded-lg overflow-hidden">
+          <div className="relative aspect-[4/3] lg:aspect-[4/5] rounded-lg overflow-hidden">
             <Image
               src="/images/about-workers.jpg"
               alt="IronPeak construction team reviewing project plans"
@@ -19,7 +19,7 @@ export function About() {
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
-          <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-brand-red rounded-lg -z-10" />
+          <div className="hidden lg:block absolute -bottom-4 -right-4 w-24 h-24 bg-brand-red rounded-lg -z-10" />
         </div>
 
         {/* Right column — Content */}
@@ -36,16 +36,16 @@ export function About() {
           </p>
 
           {/* Stats row */}
-          <div className="flex items-center mt-8 divide-x divide-brand-gray-300">
+          <div className="flex flex-wrap items-center mt-8 gap-y-4 divide-x divide-brand-gray-300">
             {STATS.map((stat) => (
               <div
-                className="px-6 first:pl-0 last:pr-0"
+                className="px-4 sm:px-6 first:pl-0 last:pr-0"
                 key={stat.label}
               >
-                <div className="text-brand-black text-3xl font-heading font-bold">
+                <div className="text-brand-black text-2xl sm:text-3xl font-heading font-bold">
                   {stat.value}
                 </div>
-                <div className="text-brand-gray-500 text-sm mt-1">
+                <div className="text-brand-gray-500 text-xs sm:text-sm mt-1">
                   {stat.label}
                 </div>
               </div>

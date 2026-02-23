@@ -18,7 +18,7 @@ export function Button({
   onClick,
 }: ButtonProps) {
   const base =
-    "inline-flex items-center gap-2 px-8 py-3.5 font-semibold font-body rounded-md transition-all duration-300 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2";
+    "inline-flex items-center justify-center gap-2 px-8 py-3.5 min-h-[44px] font-semibold font-body rounded-md transition-all duration-300 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2";
   const variants = {
     primary:
       "bg-brand-red text-white hover:bg-brand-red-dark hover:-translate-y-0.5",
@@ -29,7 +29,7 @@ export function Button({
 
   if (href) {
     return (
-      <a href={href} className={classes}>
+      <a href={href} className={classes} onClick={onClick}>
         {children}
         {showArrow && <ArrowUpRight size={18} />}
       </a>

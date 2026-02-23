@@ -39,4 +39,19 @@ describe("Services", () => {
       expect(link.closest("a")).toHaveAttribute("href", "#contact");
     }
   });
+
+  it("grid uses responsive gap (gap-6 mobile, md:gap-8 desktop)", () => {
+    const { container } = render(<Services />);
+    const grid = container.querySelector("[class*='grid-cols-1']");
+    expect(grid?.className).toContain("gap-6");
+    expect(grid?.className).toContain("md:gap-8");
+  });
+
+  it("Learn More links have minimum 44px touch target", () => {
+    render(<Services />);
+    const links = screen.getAllByText("Learn More");
+    for (const link of links) {
+      expect(link.closest("a")?.className).toContain("min-h-[44px]");
+    }
+  });
 });
