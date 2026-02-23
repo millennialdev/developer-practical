@@ -1,7 +1,10 @@
+"use client";
+
 import { SERVICES } from "@/lib/constants";
 import { SectionWrapper } from "@/components/ui/SectionWrapper";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Card } from "@/components/ui/Card";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import {
   Home,
   Hammer,
@@ -25,6 +28,8 @@ const iconMap: Record<
 };
 
 export function Services() {
+  const { ref, isVisible } = useScrollAnimation();
+
   return (
     <SectionWrapper id="services">
       <SectionHeading
@@ -34,31 +39,39 @@ export function Services() {
         centered
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mt-12">
-        {SERVICES.map((service) => {
+      <div
+        ref={ref}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mt-12"
+      >
+        {SERVICES.map((service, index) => {
           const IconComponent = iconMap[service.icon];
           return (
-            <Card
+            <div
               key={service.title}
-              image={service.image}
-              imageAlt={service.title}
+              className={`transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {IconComponent ? (
-                <IconComponent size={28} className="text-brand-red" />
-              ) : null}
-              <h3 className="font-heading text-xl font-semibold text-brand-black mt-3">
-                {service.title}
-              </h3>
-              <p className="text-brand-gray-500 text-[15px] leading-relaxed mt-2 grow">
-                {service.description}
-              </p>
-              <a
-                href="#contact"
-                className="inline-flex items-center gap-1.5 text-brand-red font-medium text-sm mt-4 min-h-[44px] hover:gap-3 transition-all duration-300"
+              <Card
+                image={service.image}
+                imageAlt={service.title}
               >
-                Learn More <ArrowRight size={16} />
-              </a>
-            </Card>
+                {IconComponent ? (
+                  <IconComponent size={28} className="text-brand-red" />
+                ) : null}
+                <h3 className="font-heading text-xl font-semibold text-brand-black mt-3">
+                  {service.title}
+                </h3>
+                <p className="text-brand-gray-500 text-[15px] leading-relaxed mt-2 grow">
+                  {service.description}
+                </p>
+                <a
+                  href="#contact"
+                  className="inline-flex items-center gap-1.5 text-brand-red font-medium text-sm mt-4 min-h-[44px] hover:gap-3 transition-all duration-300"
+                >
+                  Learn More <ArrowRight size={16} />
+                </a>
+              </Card>
+            </div>
           );
         })}
       </div>

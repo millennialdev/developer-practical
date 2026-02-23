@@ -54,4 +54,22 @@ describe("Services", () => {
       expect(link.closest("a")?.className).toContain("min-h-[44px]");
     }
   });
+
+  it("service cards have staggered transition delays", () => {
+    const { container } = render(<Services />);
+    const animatedCards = container.querySelectorAll("[class*='transition-all'][class*='duration-700']");
+    expect(animatedCards).toHaveLength(6);
+    animatedCards.forEach((card, index) => {
+      expect((card as HTMLElement).style.transitionDelay).toBe(`${index * 100}ms`);
+    });
+  });
+
+  it("service cards start in hidden state before scroll intersection", () => {
+    const { container } = render(<Services />);
+    const animatedCards = container.querySelectorAll("[class*='transition-all'][class*='duration-700']");
+    for (const card of animatedCards) {
+      expect(card.className).toContain("opacity-0");
+      expect(card.className).toContain("translate-y-6");
+    }
+  });
 });

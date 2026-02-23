@@ -1,13 +1,21 @@
+"use client";
+
 import Image from "next/image";
 import { COMPANY, STATS } from "@/lib/constants";
 import { SectionWrapper } from "@/components/ui/SectionWrapper";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 export function About() {
+  const { ref, isVisible } = useScrollAnimation();
+
   return (
     <SectionWrapper id="about" background="light">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div
+        ref={ref}
+        className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+      >
         {/* Left column — Image */}
         <div className="relative">
           <div className="relative aspect-[4/3] lg:aspect-[4/5] rounded-lg overflow-hidden">

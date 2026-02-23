@@ -64,4 +64,18 @@ describe("About", () => {
     expect(statValue.className).toContain("text-2xl");
     expect(statValue.className).toContain("sm:text-3xl");
   });
+
+  it("has scroll animation wrapper with transition classes", () => {
+    const { container } = render(<About />);
+    const animationWrapper = container.querySelector("[class*='transition-all']");
+    expect(animationWrapper).toBeInTheDocument();
+    expect(animationWrapper?.className).toContain("duration-700");
+  });
+
+  it("starts in hidden state before scroll intersection", () => {
+    const { container } = render(<About />);
+    const animationWrapper = container.querySelector("[class*='transition-all']");
+    expect(animationWrapper?.className).toContain("opacity-0");
+    expect(animationWrapper?.className).toContain("translate-y-6");
+  });
 });
